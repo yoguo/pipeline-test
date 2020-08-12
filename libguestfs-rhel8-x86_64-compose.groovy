@@ -32,7 +32,7 @@ properties([
         overrides: [
           topic: 'Consumer.rh-jenkins-ci-plugin.1d359474-dc45-11ea-8e0c-40a8f01f7098.VirtualTopic.eng.pungi.status-change.>'
         ],
-        selector: (release_version LIKE \'8._._\') AND status = \'FINISHED\' AND (release_short = \'RHEL\' OR release_short = \'ADVANCED-VIRT\') AND compose_type = \'production'
+        selector: release_version LIKE \'8._._\' AND status = \'FINISHED\' AND (release_short = \'RHEL\' OR release_short = \'ADVANCED-VIRT\') AND compose_type = \'production\'
         timeout: 30
       ]
     ]
