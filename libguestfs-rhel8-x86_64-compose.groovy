@@ -63,7 +63,6 @@ pipeline {
         }
         stage('Parse CI Message') {
             steps {
-                cleanWs()
                 script {
                     parse_ci_message()
                     //def ci_env = readYaml file: "job_env.yaml"
