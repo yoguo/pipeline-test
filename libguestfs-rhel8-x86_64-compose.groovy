@@ -56,6 +56,11 @@ pipeline {
         PYTHONPATH="${env.WORKSPACE}"
     }
     stages {
+        stage("Download xen-ci") {
+            steps {
+                checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'origin/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'xen-ci']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://code.engineering.redhat.com/gerrit/xen-ci']]]
+            }
+        }
         stage('Parse CI Message') {
             steps {
                 cleanWs()
@@ -73,20 +78,10 @@ pipeline {
                 }
             }
         }
-        stage("Prepare image") {
-            steps {
-                checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'origin/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'xen-ci']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://code.engineering.redhat.com/gerrit/xen-ci']]]
-            }
-        }
         stage ("Run Test") {
             steps {
                 echo "Run test"
             }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts '*.*'
         }
     }
 }
