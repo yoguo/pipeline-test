@@ -5,6 +5,7 @@ def parse_ci_message() {
     #!/bin/bash -x
     python $WORKSPACE/xen-ci/utils/umb_pungi_parse.py
     cat $WORKSPACE/CI_MESSAGE_ENV.txt
+    source $WORKSPACE/CI_MESSAGE_ENV.txt
     
     if [ "${release_short}" == "RHEL" ] && [ "${release_type}" == "ga" ]; then
         echo "milestone or nightly compose"
