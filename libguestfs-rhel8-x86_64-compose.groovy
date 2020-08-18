@@ -50,7 +50,7 @@ def parse_ci_message() {
     fi
 
     wget ${location}/$variant/{release_arch}/os/Packages/ -O packages.html
-    nvr=`cat packages.html | grep -v python | egrep -oe "libguestfs-[0-9]{1}.[0-9]{2}.[0-9]{1,3}-[.0-9]{2,6}module\+el8.[0-9]{1}.[0-9]{1}\+[0-9]{,6}\+[0-9,a-z]{,10}" | awk "NR==1"`
+    nvr=`cat packages.html | grep -v python | egrep -oe "libguestfs-[0-9]{1}.[0-9]{2}.[0-9]{1,3}-[.0-9]{2,6}module+el8.[0-9]{1}.[0-9]{1}+[0-9]{,6}+[0-9,a-z]{,10}" | awk "NR==1"`
     echo "NVR=$nvr" >> $WORKSPACE/CI_MESSAGE_ENV.txt
     '''
 }
