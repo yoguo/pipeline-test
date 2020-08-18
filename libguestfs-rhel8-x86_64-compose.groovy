@@ -1,6 +1,5 @@
 
 def parse_ci_message() {
-    def release_arch = 'x86_64'
     sh '''
     #!/bin/bash -x
     cp -f /home/jenkins-platform/workspace/yoguo/umb_pungi_parse.py $WORKSPACE/xen-ci/utils/
@@ -51,7 +50,7 @@ def parse_ci_message() {
         variant="Advanced-virt"
     fi
 
-    wget ${location}/$variant/{release_arch}/os/Packages/ -O packages.html
+    wget ${location}/$variant/x86_64/os/Packages/ -O packages.html
     nvr=`cat packages.html | grep -v python | egrep -oe "libguestfs-[0-9]{1}.[0-9]{2}.[0-9]{1,3}-[.0-9]{2,6}module+el8.[0-9]{1}.[0-9]{1}+[0-9]{,6}+[0-9,a-z]{,10}" | awk "NR==1"`
     echo "NVR=$nvr" >> $WORKSPACE/CI_MESSAGE_ENV.txt
     '''
