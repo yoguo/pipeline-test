@@ -3,6 +3,7 @@ def parse_ci_message() {
     def release_arch = 'x86_64'
     sh '''
     #!/bin/bash -x
+    cp -f /home/jenkins-platform/workspace/yoguo/umb_pungi_parse.py
     python $WORKSPACE/xen-ci/utils/umb_pungi_parse.py
     cat $WORKSPACE/CI_MESSAGE_ENV.txt
     source $WORKSPACE/CI_MESSAGE_ENV.txt
