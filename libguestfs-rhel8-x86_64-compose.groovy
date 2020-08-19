@@ -72,13 +72,11 @@ def runtest() {
     cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
     echo "Pinging Test Resources"
-    echo $EXISTING_NODES | xargs -i -d , ping -c 30 {}
+    echo $EXISTING_NODES | xargs ping -c 30
     env
 
     export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
     chmod 600 ${SSH_KEYFILE}
-
-    echo "====================================================="
 
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
