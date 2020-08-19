@@ -66,7 +66,6 @@ def provision_env() {
 }
 
 def runtest() {
-    echo ${env.release_type}
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/CI_MESSAGE_ENV.txt
