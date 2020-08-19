@@ -59,6 +59,8 @@ def provision_env() {
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/DISTRO.txt
+    export DISTRO
+    //export DISTRO=$(cat $WORKSPACE/DISTRO.txt | awk -F"=" '{print $2}')
     export TARGET="libguestfs-rhel8"
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
     '''
