@@ -55,6 +55,21 @@ def parse_ci_message() {
     '''
 }
 
+def provision_env() {
+    sh '''
+    #!/bin/bash -x
+    source $WORKSPACE/DISTRO.txt
+    export TARGET="libguestfs-rhel8"
+    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
+    '''
+}
+
+def runtest() {
+    sh '''
+    #!/bin/bash -x
+    echo "runtest"
+    '''
+}
 
 // Global variables
 COMPOSE_URL=""
@@ -125,9 +140,18 @@ pipeline {
                 }
             }
         }
+        stage ("Provision Env") {
+            steps {
+                script {
+                    provision_env()
+                }
+            }
+        }
         stage ("Run Test") {
             steps {
-                echo "Run test"
+                script {
+                    runtest()
+                }
             }
         }
     }
