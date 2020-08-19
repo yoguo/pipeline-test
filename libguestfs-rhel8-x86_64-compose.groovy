@@ -66,6 +66,7 @@ def provision_env() {
 }
 
 def runtest() {
+    echo ${env.release_type}
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/CI_MESSAGE_ENV.txt
@@ -81,15 +82,15 @@ def runtest() {
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
     export EXISTING_NODES
+    export release_version
+    export release_type
+    export release_short
+    export location
     
-    release_type=${env.release_type}
-    echo ${release_type}
-
-    #$WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
+    $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
     prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
-    echo $prefix
     #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
     '''
 }
@@ -129,7 +130,10 @@ pipeline {
         string(defaultValue: '', description: 'Can be triggerd by COMPOSEID_URL or CI_MESSAGE', name: 'CI_MESSAGE')
     }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '20'))
+        buildDiscarder(logRotator(numToKeepStr: '30'))
+        //buildDiscarder(logRotator(daysToKeepStr: '90', artifactDaysToKeepStr: '90'))
+        timestamps()
+        timeout(time: 3, unit: 'DAYS')
     }
     environment {
         PYTHONPATH="${env.WORKSPACE}"
