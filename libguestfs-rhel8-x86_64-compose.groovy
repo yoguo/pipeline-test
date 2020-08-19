@@ -60,29 +60,41 @@ def provision_env() {
     #!/bin/bash -x
     source $WORKSPACE/DISTRO.txt
     export DISTRO
-    #export DISTRO=$(cat $WORKSPACE/DISTRO.txt | awk -F"=" '{print $2}')
     export TARGET="libguestfs-rhel8"
-    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
+    #$WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
     '''
 }
 
 def runtest() {
     sh '''
     #!/bin/bash -x
-    echo "runtest"
+    source $WORKSPACE/CI_MESSAGE_ENV.txt
+    cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
+    source $WORKSPACE/RESOURCES.txt
+    echo "Pinging Test Resources"
+    echo $EXISTING_NODES | xargs -i -d , ping -c 30 {}
+    env
+
+    export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
+    chmod 600 ${SSH_KEYFILE}
+
+    echo "====================================================="
+
+    export GIT_BRANCH="latest-rhel8"
+    export TEST_ARCH="x86_64"
+
+    #$WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
+    #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
+
+    prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
+    echo $prefix
+    #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
     '''
 }
 
 // Global variables
 COMPOSE_URL=""
-COMPOSE_ENV_YAML=""
 COMPOSE_ID=""
-REPO_URL=""
-TESTRESULT=""
-HTMLURL=""
-PKGNAME=""
-TMPFILE="" // For saving variables from AWS-*-runtest-pipeline
-BUILD_URL=""
 
 
 //https://plugins.jenkins.io/jms-messaging
