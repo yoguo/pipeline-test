@@ -81,8 +81,11 @@ def runtest() {
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
     export EXISTING_NODES
+    
+    release_type=${env.release_type}
+    echo ${release_type}
 
-    $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
+    #$WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
     prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
@@ -141,6 +144,8 @@ pipeline {
             steps {
                 script {
                     parse_ci_message()
+                    env.release_type = "ga"
+                    //env.release_type = sh(returnStdout: true, script: "git rev-parse HEAD | cut -c1-7").trim()
                     //def ci_env = readYaml file: "job_env.yaml"
                     //currentBuild.displayName = "${env.BUILD_ID}_${ci_env.COMPOSE_ID}"
                     //COMPOSE_ENV_YAML = readFile file: "job_env.yaml".trim()
