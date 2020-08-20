@@ -99,7 +99,7 @@ def send_notify() {
     body: """${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'
     Check console output at ${env.BUILD_URL}""",
     subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'",
-    from: "nobody@nowhere"
+    from: "nobody@nowhere",
     to: "yoguo@redhat.com"
   )
 }
