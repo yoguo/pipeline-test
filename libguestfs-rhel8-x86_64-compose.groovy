@@ -85,7 +85,7 @@ def runtest() {
     export release_type
     export release_short
     export location
-    
+    cp -f /home/jenkins-platform/workspace/yoguo/xUnit.xml $WORKSPACE 
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
@@ -179,7 +179,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: '*.txt, *.json, *.xml', fingerprint: true, allowEmptyArchive: true
-            step([$class: 'XUnitBuilder',
+            step([$class: 'XUnitPublisher',
                 thresholds: [[$class: 'FailedThreshold', failureThreshold: '1']],
                 tools: [[$class: 'JUnitType', pattern: 'xUnit.xml']]])
             send_notify()
