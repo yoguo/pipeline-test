@@ -78,7 +78,7 @@ def runtest() {
     env
 
     export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
-    chmod 600 ${SSH_KEYFILE}
+    chmod 600 \${SSH_KEYFILE}
 
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
