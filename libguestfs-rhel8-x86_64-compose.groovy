@@ -160,6 +160,10 @@ pipeline {
         }
         stage ("Provision Env") {
             steps {
+                sh """
+                    brf1=${env.release_type}
+                    echo \$brf1 
+                """
                 script {
                     provision_env()
                 }
