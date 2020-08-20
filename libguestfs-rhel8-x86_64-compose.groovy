@@ -157,7 +157,6 @@ pipeline {
             steps {
                 script {
                     parse_ci_message()
-                    env.release_type = "ga"
                 }
             }
         }
