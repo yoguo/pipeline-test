@@ -67,8 +67,9 @@ def provision_env() {
 
 def runtest1() {
     sh """
-    release_type = ${env.release_type}
-    echo \$release_type 
+    #!/bin/bash -x
+    type = ${env.release_type}
+    echo \$type 
     """
 }
 def runtest() {
@@ -160,10 +161,6 @@ pipeline {
         }
         stage ("Provision Env") {
             steps {
-                sh """
-                    brf1=${env.release_type}
-                    echo \$brf1 
-                """
                 script {
                     provision_env()
                 }
@@ -175,6 +172,9 @@ pipeline {
                     brf=${env.release_type}
                     echo \$brf 
                 """
+                script {
+                    runtest1()
+                }
             }
         }
     }
