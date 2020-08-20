@@ -65,12 +65,17 @@ def provision_env() {
     '''
 }
 
+def runtest1() {
+    sh """
+    release_type = ${env.release_type}
+    echo \$release_type 
+    """
+}
 def runtest() {
     sh """
     #!/bin/bash -x
     release_type = ${env.release_type}
     echo \$release_type
-    export \$release_type
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
@@ -163,7 +168,7 @@ pipeline {
         stage ("Run Test") {
             steps {
                 script {
-                    runtest()
+                    runtest1()
                 }
             }
         }
