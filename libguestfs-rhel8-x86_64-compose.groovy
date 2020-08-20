@@ -136,10 +136,10 @@ pipeline {
         }
     }
     parameters {
-        string(defaultValue: '', description: 'Can be triggerd by COMPOSEID_URL or CI_MESSAGE', name: 'CI_MESSAGE')
+        string(defaultValue: '', description: 'Can be triggerd by CI_MESSAGE', name: 'CI_MESSAGE')
     }
     options {
-        buildDiscarder(logRotator(numToKeepStr: '30'))
+        buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
         //buildDiscarder(logRotator(daysToKeepStr: '90', artifactDaysToKeepStr: '90'))
         timestamps()
         timeout(time: 3, unit: 'DAYS')
@@ -157,6 +157,8 @@ pipeline {
             steps {
                 script {
                     parse_ci_message()
+                    def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F"=" '{print \$2}'", returnStdout: true).trim()
+                    currentBuild.displayName = "${compose_id}_${env.BUILD_ID}"
                 }
             }
         }
