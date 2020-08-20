@@ -82,11 +82,10 @@ def runtest() {
 
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
-    export EXISTING_NODES
-    export release_version
-    export release_type
-    export release_short
-    export location
+    export \$EXISTING_NODES
+    export \$release_version
+    export \$release_short
+    export \$location
     
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
