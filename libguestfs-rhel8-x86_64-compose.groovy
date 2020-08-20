@@ -66,10 +66,10 @@ def provision_env() {
 }
 
 def runtest1() {
-    sh """
+    sh '''
     #!/bin/bash -x
     echo ${env.release_type}
-    """
+    '''
 }
 def runtest() {
     sh """
