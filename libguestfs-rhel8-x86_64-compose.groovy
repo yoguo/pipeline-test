@@ -70,6 +70,7 @@ def runtest() {
     #!/bin/bash -x
     release_type = ${env.release_type}
     echo \$release_type
+    export \$release_type
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
