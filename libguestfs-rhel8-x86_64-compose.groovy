@@ -167,11 +167,11 @@ pipeline {
         }
         stage ("Run Test") {
             steps {
-                script {
                     sh """
                     type = ${env.release_type}
                     echo \$type 
                     """
+                script {
                     //runtest1()
                 }
             }
