@@ -66,8 +66,10 @@ def provision_env() {
 }
 
 def runtest() {
-    sh '''
+    sh """
     #!/bin/bash -x
+    release_type = ${env.release_type}
+    echo \$release_type
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
@@ -91,7 +93,7 @@ def runtest() {
 
     prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
     #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
-    '''
+    """
 }
 
 // Global variables
@@ -148,16 +150,6 @@ pipeline {
                 script {
                     parse_ci_message()
                     env.release_type = "ga"
-                    //env.release_type = sh(returnStdout: true, script: "git rev-parse HEAD | cut -c1-7").trim()
-                    //def ci_env = readYaml file: "job_env.yaml"
-                    //currentBuild.displayName = "${env.BUILD_ID}_${ci_env.COMPOSE_ID}"
-                    //COMPOSE_ENV_YAML = readFile file: "job_env.yaml".trim()
-                    //COMPOSE_URL = ci_env.COMPOSE_URL
-                    //PKGNAME = ci_env.PKGNAME
-                    //COMPOSE_ID = ci_env.COMPOSE_ID
-                    //REPO_URL = ci_env.REPO_URL
-                    //BUILD_URL = ci_env.BUILD_URL
-                    //echo "${COMPOSE_ENV_YAML}"
                 }
             }
         }
