@@ -65,40 +65,43 @@ def provision_env() {
     '''
 }
 
-def runtest1() {
+def runtest() {
     sh '''
     #!/bin/bash -x
-    echo ${env.release_type}
-    '''
-}
-def runtest() {
-    sh """
-    #!/bin/bash -x
-    release_type = ${env.release_type}
-    echo \$release_type
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
     echo "Pinging Test Resources"
-    echo \$EXISTING_NODES | xargs ping -c 30
+    echo $EXISTING_NODES | xargs ping -c 30
     env
 
     export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
-    chmod 600 \${SSH_KEYFILE}
+    chmod 600 ${SSH_KEYFILE}
 
     export GIT_BRANCH="latest-rhel8"
     export TEST_ARCH="x86_64"
-    export \$EXISTING_NODES
-    export \$release_version
-    export \$release_short
-    export \$location
+    export EXISTING_NODES
+    export release_version
+    export release_type
+    export release_short
+    export location
     
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
-    prefix=\$(echo "\${NVR} \${compose_id} \${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
-    #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "\$prefix" -k zeFae6ceiRiewae
-    """
+    prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
+    #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
+    '''
+}
+
+def send_notify() {
+    emailext (
+    body: """${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'
+    Check console output at ${env.BUILD_URL}""",
+    subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'",
+    from: "nobody@nowhere"
+    to: "yoguo@redhat.com"
+  )
 }
 
 // Global variables
@@ -167,14 +170,20 @@ pipeline {
         }
         stage ("Run Test") {
             steps {
-                sh """
-                    brf=${env.release_type}
-                    echo \$brf 
-                """
                 script {
-                    runtest1()
+                    runtest()
                 }
             }
         }
     }
+    post {
+        always {
+            archiveArtifacts artifacts: '*.txt, *.json, *.xml', fingerprint: true, allowEmptyArchive: true
+            step([$class: 'XUnitBuilder',
+                thresholds: [[$class: 'FailedThreshold', failureThreshold: '1']],
+                tools: [[$class: 'JUnitType', pattern: 'xUnit.xml']]])
+            send_notify()
+        }
+    }
+
 }
