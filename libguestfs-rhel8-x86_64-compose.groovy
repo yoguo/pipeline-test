@@ -157,7 +157,7 @@ pipeline {
             steps {
                 script {
                     parse_ci_message()
-                    def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F"=" '{print \$2}'", returnStdout: true).trim()
+                    def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F'=' '{print \$2}'", returnStdout: true).trim()
                     currentBuild.displayName = "${compose_id}_${env.BUILD_ID}"
                 }
             }
