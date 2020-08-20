@@ -68,8 +68,7 @@ def provision_env() {
 def runtest1() {
     sh """
     #!/bin/bash -x
-    type = ${env.release_type}
-    echo \$type 
+    echo ${env.release_type}
     """
 }
 def runtest() {
