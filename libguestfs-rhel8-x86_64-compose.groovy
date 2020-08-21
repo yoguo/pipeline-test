@@ -61,7 +61,7 @@ def provision_env() {
     source $WORKSPACE/DISTRO.txt
     export DISTRO
     export TARGET="libguestfs-rhel8"
-    #$WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
+    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
     '''
 }
 
@@ -87,18 +87,22 @@ def runtest() {
     export location
     cp -f /home/jenkins-platform/workspace/yoguo/xUnit.xml $WORKSPACE 
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
-    #$WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
+    $WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
     prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
-    #$WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
+    $WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
     '''
 }
 
 def send_notify() {
     emailext (
-    body: """${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'
-    Check console output at ${env.BUILD_URL}""",
-    subject: "${currentBuild.result}: Job '${env.JOB_NAME} [${env.BUILD_DISPLAY_NAME}]'",
+    body: """
+    JOB_NAME: ${env.JOB_NAME}
+    BUILD_DISPLAY_NAME: ${env.BUILD_DISPLAY_NAME}
+    RESULT: ${currentBuild.currentResult}
+    Check console output: ${env.BUILD_URL}
+    """,
+    subject: "${env.JOB_NAME} - ${env.BUILD_DISPLAY_NAME} - ${currentBuild.currentResult}",
     from: "nobody@nowhere",
     to: "yoguo@redhat.com"
   )
@@ -107,7 +111,6 @@ def send_notify() {
 // Global variables
 COMPOSE_URL=""
 COMPOSE_ID=""
-
 
 //https://plugins.jenkins.io/jms-messaging
 properties([
@@ -158,7 +161,7 @@ pipeline {
                 script {
                     parse_ci_message()
                     def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-                    currentBuild.displayName = "${compose_id}_${env.BUILD_ID}"
+                    currentBuild.displayName = "${compose_id}_#${env.BUILD_ID}"
                 }
             }
         }
