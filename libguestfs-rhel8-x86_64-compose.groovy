@@ -69,7 +69,6 @@ def runtest() {
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/CI_MESSAGE_ENV.txt
-    cp -f /home/jenkins-platform/workspace/yoguo/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
     echo "Pinging Test Resources"
     echo $EXISTING_NODES | xargs ping -c 30
@@ -85,7 +84,6 @@ def runtest() {
     export release_type
     export release_short
     export location
-    cp -f /home/jenkins-platform/workspace/yoguo/xUnit.xml $WORKSPACE 
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8.sh |& tee $WORKSPACE/log.libguestfs_runtest
     $WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
@@ -97,10 +95,10 @@ def runtest() {
 def send_notify() {
     emailext (
     body: """
-    JOB_NAME: ${env.JOB_NAME}
-    BUILD_DISPLAY_NAME: ${env.BUILD_DISPLAY_NAME}
-    RESULT: ${currentBuild.currentResult}
-    Check console output: ${env.BUILD_URL}
+JOB_NAME: ${env.JOB_NAME}
+BUILD_DISPLAY_NAME: ${env.BUILD_DISPLAY_NAME}
+RESULT: ${currentBuild.currentResult}
+BUILD_URL: ${env.BUILD_URL}
     """,
     subject: "${env.JOB_NAME} - ${env.BUILD_DISPLAY_NAME} - ${currentBuild.currentResult}",
     from: "nobody@nowhere",
