@@ -37,8 +37,7 @@ def parse_ci_message() {
                 compose_repo=$repo
                 break
             fi
-            done
-         else
+        done
     else
         tree_name=latest-RHEL-8.3.0
         compose_repo=$MILESTONE_COMPOSE_REPO
