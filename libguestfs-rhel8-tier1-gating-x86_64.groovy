@@ -12,24 +12,24 @@ def parse_ci_message() {
     release_stream=$(cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i RELEASE_STREAM | awk -F'=' '{print \$2}')
     branch=${release_stream#*el}
     
-    if [[ "$branch" ~= "8.0.0" ]];then
+    if [[ "$branch" =~ "8.0.0" ]];then
         tree_name=latest-RHEL-8.0.0
         compose_repo=$MILESTONE_COMPOSE_REPO
-    elif [[ "$branch" ~= "8.1.0" ]];then
+    elif [[ "$branch" =~ "8.1.0" ]];then
         tree_name=latest-RHEL-8.1.0
         compose_repo=$MILESTONE_COMPOSE_REPO
-    elif [[ "$branch" ~= "8.1.1" ]];then
+    elif [[ "$branch" =~ "8.1.1" ]];then
         tree_name=latest-RHEL-8.1.1
         compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.1.1-updates)
         compose_repo=$UPDATES_REPO
-    elif [[ "$branch" ~= "8.2.0" ]];then
+    elif [[ "$branch" =~ "8.2.0" ]];then
         tree_name=latest-RHEL-8.2.0
         compose_repo=$MILESTONE_COMPOSE_REPO
-    elif [[ "$branch" ~= "8.2.1" ]];then
+    elif [[ "$branch" =~ "8.2.1" ]];then
         tree_name=latest-RHEL-8.2.1
         compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.2.1-updates)
         compose_repo=$UPDATES_REPO
-    elif [[ "$branch" ~= "8.3.0" ]];then
+    elif [[ "$branch" =~ "8.3.0" ]];then
         tree_name=latest-RHEL-8.3.0
         compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.3.0-20)
 
