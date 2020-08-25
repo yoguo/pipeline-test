@@ -266,6 +266,9 @@ pipeline {
             customWorkspace "workspace/${env.JOB_NAME}-${env.BUILD_ID}"
         }
     }
+    parameters {
+        string(defaultValue: '', description: 'Can be triggerd by CI_MESSAGE', name: 'CI_MESSAGE')
+    }
     options {
         buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
         timestamps()
