@@ -2,11 +2,14 @@
 def parse_ci_message() {
     sh '''
     #!/bin/bash -x
-    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_module_parse.py $WORKSPACE/xen-ci/utils/
-    python $WORKSPACE/xen-ci/utils/ci_message_module_parse.py
-    source $WORKSPACE/CI_MESSAGE_ENV.txt
+    if ! [ -z "${CI_MESSAGE}" ];then
+        echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
+        cp -f /home/jenkins-platform/workspace/yoguo/ci_message_module_parse.py $WORKSPACE/xen-ci/utils/
+        python $WORKSPACE/xen-ci/utils/ci_message_module_parse.py
+        source $WORKSPACE/CI_MESSAGE_ENV.txt
+    fi
     
-    release_stream=$(cat ci_message_env.json | grep -i release_stream | awk '{print \$2}' | sed 's/\\"//g')
+    release_stream=$(cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i RELEASE_STREAM | awk -F'=' '{print \$2}')
     branch=${release_stream#*el}
     
     if [[ "$branch" ~= "8.0.0" ]];then
@@ -265,9 +268,6 @@ pipeline {
             label "jslave-libguestfs"
             customWorkspace "workspace/${env.JOB_NAME}-${env.BUILD_ID}"
         }
-    }
-    parameters {
-        string(defaultValue: '', description: 'Can be triggerd by CI_MESSAGE', name: 'CI_MESSAGE')
     }
     options {
         buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
