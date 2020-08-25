@@ -29,15 +29,7 @@ def parse_ci_message() {
         compose_repo=$UPDATES_REPO
     elif [[ "$branch" =~ "8.3.0" ]];then
         tree_name=latest-RHEL-8.3.0
-        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.3.0-20)
-        for repo in ${MILESTONE_COMPOSE_REPO} ${NIGHTLY_REPO}; do
-            echo $repo
-            wget $repo/$compose_id
-            if [ "$?" == 0 ]; then
-                compose_repo=$repo
-                break
-            fi
-        done
+        compose_repo=$MILESTONE_COMPOSE_REPO
     else
         tree_name=latest-RHEL-8.3.0
         compose_repo=$MILESTONE_COMPOSE_REPO
