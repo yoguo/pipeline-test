@@ -240,7 +240,7 @@ properties(
                             field: '$.name'
                         ],
                         [
-                            expectedValue: 'false',
+                            expectedValue: 'true',
                             field: '$.scratch'
                         ]
                     ]
@@ -280,6 +280,7 @@ pipeline {
                 script {
                     parse_ci_message()
                     def ci_env = readYaml file: "ci_message_env.yaml"
+                    echo "${ci_env.KOJI_TAG}"
                     currentBuild.displayName = "#${env.BUILD_ID}_${ci_env.KOJI_TAG}"
                 }
             }
