@@ -79,6 +79,7 @@ def runtest() {
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/CI_MESSAGE_ENV.txt
+    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
     source $WORKSPACE/COMPOSE_REPO.txt
     source $WORKSPACE/COMPOSE_ID.txt
@@ -88,7 +89,6 @@ def runtest() {
     env
 
     export GIT_BRANCH="latest-rhel8"
-    #export TEST_ARCH="x86_64"
     export EXISTING_NODES
     export COMPOSE_REPO
     export COMPOSE_ID
@@ -102,13 +102,15 @@ def runtest() {
     echo "NSVC=$nsvc" >> $CI_NOTIFIER_VARS
 
     if [ "$RESOURCE_LOCATION" == "openstack" ]; then
-        cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
-        $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
+        #cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
+        #$WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     else
         cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     fi
 
+    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/xUnit.xml $WORKSPACE
+    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/xUnit_log.xml $WORKSPACE
     if [ ! -f "xUnit.xml" ];then
         echo "TEST_RESULT=failed" >> $CI_NOTIFIER_VARS
         exit 1
@@ -116,7 +118,7 @@ def runtest() {
 
     $WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
     FAILURES_NUM=$(xmllint --xpath "//testsuites/testsuite/@failures" xUnit.xml | awk -F'=' '{print \$2}')
-    ERRORS_NUM=$(xmllint --xpath "//testsuites/testsuite/@errors" xUnit.xml | awk -F'=' '{print \$2})
+    ERRORS_NUM=$(xmllint --xpath "//testsuites/testsuite/@errors" xUnit.xml | awk -F'=' '{print \$2}')
 
     if [ "$FAILURES_NUM" != '"0"' ] || [ "$ERRORS_NUM" != '"0"' ]; then
         test_result="failed"
@@ -210,12 +212,6 @@ BUILD_URL: ${env.BUILD_URL}
 
 properties(
     [
-        [$class: 'CachetJobProperty',
-            requiredResources: true,
-            resources: [
-                'umb'
-            ]
-        ],
         parameters(
             [
                 string(name: 'CI_MESSAGE', defaultValue: '', description: 'Content of Red Hat UMB Msg')
@@ -288,7 +284,7 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
-                    provision_env()
+                    //provision_env()
                 }
             }
         }
