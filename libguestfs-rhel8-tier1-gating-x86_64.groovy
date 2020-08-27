@@ -79,7 +79,6 @@ def runtest() {
     sh '''
     #!/bin/bash -x
     source $WORKSPACE/CI_MESSAGE_ENV.txt
-    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/RESOURCES.txt $WORKSPACE
     source $WORKSPACE/RESOURCES.txt
     source $WORKSPACE/COMPOSE_REPO.txt
     source $WORKSPACE/COMPOSE_ID.txt
@@ -90,6 +89,7 @@ def runtest() {
 
     export GIT_BRANCH="latest-rhel8"
     export EXISTING_NODES
+    export RUN_ID
     export COMPOSE_REPO
     export COMPOSE_ID
     export TREE_NAME
@@ -102,15 +102,13 @@ def runtest() {
     echo "NSVC=$nsvc" >> $CI_NOTIFIER_VARS
 
     if [ "$RESOURCE_LOCATION" == "openstack" ]; then
-        #cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
-        #$WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
+        cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
+        $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     else
         cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     fi
 
-    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/xUnit.xml $WORKSPACE
-    cp -f /home/jenkins-platform/workspace/libguestfs-rhel8-tier1-gating-x86_64-19/xUnit_log.xml $WORKSPACE
     if [ ! -f "xUnit.xml" ];then
         echo "TEST_RESULT=failed" >> $CI_NOTIFIER_VARS
         exit 1
@@ -256,7 +254,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
         timestamps()
-        timeout(time: 3, unit: 'DAYS')
+        timeout(time: 1, unit: 'DAYS')
     }
     environment {
         MILESTONE_COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
@@ -284,8 +282,8 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
-                    //provision_env()
-                    echo "Provisioning Env is successfully"
+                    echo "Provisioning ..."
+                    provision_env()
                 }
             }
         }
