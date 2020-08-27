@@ -285,6 +285,7 @@ pipeline {
             steps {
                 script {
                     //provision_env()
+                    echo "Provisioning Env is successfully"
                 }
             }
         }
