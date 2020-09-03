@@ -16,15 +16,15 @@ def parse_ci_message() {
         else
             compose_repo="http://download.eng.pek2.redhat.com/rhel-8/rel-eng/RHEL-8"
         fi
-        wget -O compose_status $compose_repo/${compose_id}/STATUS
-        WGET_STATUS=$?
+        WGET_STATUS=0
+        wget -O compose_status $compose_repo/${compose_id}/STATUS || WGET_STATUS=1
         compose_status=`cat compose_status`
         until [ "$WGET_STATUS" == "0" -a "$compose_status" == "FINISHED" ]
         do
             echo "The new compose ${compose_id} is not ready in pek2 repo now. Waiting..."
             sleep 10m
-            wget -O compose_status $compose_repo/${compose_id}/STATUS
-            WGET_STATUS=$?
+            WGET_STATUS=0
+            wget -O compose_status $compose_repo/${compose_id}/STATUS || WGET_STATUS=1
             compose_status=`cat compose_status`
         done
     else
@@ -106,9 +106,6 @@ BUILD_URL: ${env.BUILD_URL}
   )
 }
 
-// Global variables
-COMPOSE_URL=""
-COMPOSE_ID=""
 
 //https://plugins.jenkins.io/jms-messaging
 properties([
@@ -133,7 +130,7 @@ pipeline {
     agent {
         node {
             label "jslave-libguestfs"
-            customWorkspace "workspace/${env.JOB_NAME}-${env.BUILD_ID}"
+            customWorkspace "workspace/${env.JOB_NAME}"
         }
     }
     parameters {
@@ -149,7 +146,7 @@ pipeline {
         PYTHONPATH="${env.WORKSPACE}"
     }
     stages {
-        stage("Download xen-ci") {
+        stage("Checkout xen-ci") {
             steps {
                 checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'origin/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'xen-ci']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://code.engineering.redhat.com/gerrit/xen-ci']]]
             }
