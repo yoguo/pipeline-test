@@ -45,10 +45,7 @@ def parse_ci_message() {
 
     echo $compose_id
     echo "COMPOSE_ID=$compose_id" > $WORKSPACE/COMPOSE_ID.txt
-
-    wget $compose_repo/$tree_name/STATUS
-    WGET_STATUS=$?
-    if [ "$WGET_STATUS" != 0 ]; then echo "ERROR: wget\nSTATUS: $WGET_STATUS"; exit 1; fi
+    wget $compose_repo/$tree_name/STATUS || exit 1
     '''
 }
 
@@ -60,15 +57,11 @@ def provision_env() {
     export TARGET="libguestfs-rhel8-os"
     resource_location="openstack"
     cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_provision_env.sh $WORKSPACE/xen-ci/utils/
-    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_openstack
-    if [ "$?" != 0 ]; then
+    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_openstack || { 
         export TARGET="libguestfs-rhel8-gating"
         resource_location="beaker"
-        $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker
-        if [ "$?" != 0 ]; then
-            exit 1
-        fi
-    fi
+        $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker || exit 1
+    }
 
     echo "RESOURCE_LOCATION=$resource_location" >> $WORKSPACE/RESOURCES.txt
     echo "TARGET=$TARGET" >> $WORKSPACE/RESOURCES.txt
@@ -248,7 +241,7 @@ pipeline {
     agent {
         node {
             label "jslave-libguestfs"
-            customWorkspace "workspace/${env.JOB_NAME}-${env.BUILD_ID}"
+            customWorkspace "workspace/${env.JOB_NAME}"
         }
     }
     options {
@@ -263,7 +256,7 @@ pipeline {
         TEST_ARCH = 'x86_64'
     }
     stages {
-        stage("Download xen-ci") {
+        stage("Checkout xen-ci") {
             steps {
                 cleanWs()
                 checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'origin/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'xen-ci']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://code.engineering.redhat.com/gerrit/xen-ci']]]
