@@ -1,12 +1,11 @@
 def get_test_arch() {
-    TEST_ARCH = sh(script: "echo '${env.JOB_NAME}' | awk -F'-' '{print \$5}'", returnStdout: true).trim()
-    if (${TEST_ARCH} == "aarch64") {
+    if (TEST_ARCH == "aarch64") {
         uuid = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
     }
-    if (${TEST_ARCH} == "ppc64le") {
+    if (TEST_ARCH == "ppc64le") {
         uuid = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
     }
-    if (${TEST_ARCH} == "s390x") {
+    if (TEST_ARCH == "s390x") {
         uuid = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
     }
 }
@@ -185,7 +184,6 @@ BUILD_URL: ${env.BUILD_URL}
 }
 
 // Global variables
-TEST_ARCH=""
 uuid=""
 
 properties(
@@ -237,6 +235,7 @@ pipeline {
         timeout(time: 1, unit: 'DAYS')
     }
     environment {
+        TEST_ARCH = sh(script: "echo '${env.JOB_NAME}' | awk -F'-' '{print \$5}'", returnStdout: true).trim()
         COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
     }
     stages {
