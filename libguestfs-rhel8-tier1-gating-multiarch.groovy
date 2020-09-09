@@ -1,13 +1,13 @@
 def get_test_arch() {
     TEST_ARCH = sh(script: "echo '${env.JOB_NAME}' | awk -F'-' '{print \$5}'", returnStdout: true).trim()
     if (${TEST_ARCH} == "aarch64") {
-        UUID = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
+        uuid = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
     }
     if (${TEST_ARCH} == "ppc64le") {
-        UUID = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
+        uuid = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
     }
     if (${TEST_ARCH} == "s390x") {
-        UUID = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
+        uuid = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
     }
 }
 
@@ -186,7 +186,7 @@ BUILD_URL: ${env.BUILD_URL}
 
 // Global variables
 TEST_ARCH=""
-UUID=""
+uuid=""
 
 properties(
     [
@@ -202,7 +202,7 @@ properties(
                     $class: 'ActiveMQSubscriberProviderData',
                     name: 'Red Hat UMB',
                     overrides: [
-                        topic: 'Consumer.rh-jenkins-ci-plugin.${UUID}.VirtualTopic.eng.mbs.module.state.change'
+                        topic: 'Consumer.rh-jenkins-ci-plugin.${uuid}.VirtualTopic.eng.mbs.module.state.change'
                     ],
                     checks: [
                         [
