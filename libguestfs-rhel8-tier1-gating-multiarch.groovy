@@ -69,6 +69,7 @@ def runtest() {
     env
 
     export GIT_BRANCH="latest-rhel8"
+    export TARGET="libguestfs-rhel8-gating"
     export EXISTING_NODES
     export RUN_ID
     export COMPOSE_REPO
