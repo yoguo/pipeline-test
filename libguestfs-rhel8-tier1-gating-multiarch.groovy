@@ -154,7 +154,7 @@ def send_ci_message() {
   "category": "functional",
   "thread_id": "${ci.ID}-${TEST_ARCH}-gating",
   "status": "${test_result}",
-  "namespace": "xen-ci.libguestfs.redhat-module",
+  "namespace": "xen-ci.libguestfs.redhat-module.gating.${TEST_ARCH}",
   "generated_at": "${date}",
   "xunit": "${xunit_result}",
   "version": "0.1.0"
