@@ -179,15 +179,15 @@ properties(
                 string(name: 'CI_MESSAGE', defaultValue: '', description: 'Content of Red Hat UMB Msg')
             ]
         ),
-        pipelineTriggers(
+        /*pipelineTriggers(
             [[$class: 'CIBuildTrigger',
                 noSquash: true,
                 providerData: [
                     $class: 'ActiveMQSubscriberProviderData',
                     name: 'Red Hat UMB',
-                    /*overrides: [
-                        topic: 'Consumer.rh-jenkins-ci-plugin.${uuid}.VirtualTopic.eng.mbs.module.state.change'
-                    ],*/
+                    overrides: [
+                        topic: 'Consumer.rh-jenkins-ci-plugin.a13bd272-f245-11ea-81fd-40a8f01f7098.VirtualTopic.eng.mbs.module.state.change'
+                    ],
                     checks: [
                         [
                             expectedValue: 'done',
@@ -204,7 +204,7 @@ properties(
                     ]
                 ]
             ]]
-        )
+        )*/
     ]
 )
 
@@ -234,16 +234,6 @@ pipeline {
         stage('Parse CI Message') {
             steps {
                 script {
-                    if (env.TEST_ARCH == "aarch64") {
-                        env.uuid = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
-                    }
-                    if (env.TEST_ARCH == "ppc64le") {
-                        env.uuid = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
-                    }
-                    if (env.TEST_ARCH == "s390x") {
-                        env.uuid = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
-                    }
-                    echo "uuid: ${env.uuid}"
                     parse_ci_message()
                     def ci_env = readYaml file: "ci_message_env.yaml"
                     echo "${ci_env.KOJI_TAG}"
