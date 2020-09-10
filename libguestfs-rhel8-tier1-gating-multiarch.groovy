@@ -1,15 +1,3 @@
-def get_test_arch() {
-    if (TEST_ARCH == "aarch64") {
-        uuid = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
-    }
-    if (TEST_ARCH == "ppc64le") {
-        uuid = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
-    }
-    if (TEST_ARCH == "s390x") {
-        uuid = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
-    }
-}
-
 def parse_ci_message() {
     sh '''
     #!/bin/bash -x
@@ -201,7 +189,7 @@ properties(
                     $class: 'ActiveMQSubscriberProviderData',
                     name: 'Red Hat UMB',
                     overrides: [
-                        topic: 'Consumer.rh-jenkins-ci-plugin.${uuid}.VirtualTopic.eng.mbs.module.state.change'
+                        topic: 'Consumer.rh-jenkins-ci-plugin.${env.uuid}.VirtualTopic.eng.mbs.module.state.change'
                     ],
                     checks: [
                         [
@@ -249,7 +237,16 @@ pipeline {
         stage('Parse CI Message') {
             steps {
                 script {
-                    get_test_arch()
+                    if (env.TEST_ARCH == "aarch64") {
+                        env.uuid = 'a13bd272-f245-11ea-81fd-40a8f01f7098'
+                    }
+                    if (env.TEST_ARCH == "ppc64le") {
+                        env.uuid = 'b6ab0e5c-f245-11ea-9818-40a8f01f7098'
+                    }
+                    if (env.TEST_ARCH == "s390x") {
+                        env.uuid = 'da40b3d0-f245-11ea-8b1f-40a8f01f7098'
+                    }
+                    echo "uuid: ${env.uuid}"
                     parse_ci_message()
                     def ci_env = readYaml file: "ci_message_env.yaml"
                     echo "${ci_env.KOJI_TAG}"
