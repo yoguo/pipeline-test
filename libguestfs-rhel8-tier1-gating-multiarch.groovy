@@ -172,9 +172,6 @@ BUILD_URL: ${env.BUILD_URL}
   )
 }
 
-// Global variables
-uuid=""
-
 properties(
     [
         parameters(
@@ -188,9 +185,9 @@ properties(
                 providerData: [
                     $class: 'ActiveMQSubscriberProviderData',
                     name: 'Red Hat UMB',
-                    overrides: [
-                        topic: 'Consumer.rh-jenkins-ci-plugin.${env.uuid}.VirtualTopic.eng.mbs.module.state.change'
-                    ],
+                    /*overrides: [
+                        topic: 'Consumer.rh-jenkins-ci-plugin.${uuid}.VirtualTopic.eng.mbs.module.state.change'
+                    ],*/
                     checks: [
                         [
                             expectedValue: 'done',
