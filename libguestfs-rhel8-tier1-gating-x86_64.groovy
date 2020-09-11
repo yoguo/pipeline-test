@@ -293,7 +293,7 @@ pipeline {
         always {
             archiveArtifacts artifacts: '*.txt, *.json, *.xml', fingerprint: true, allowEmptyArchive: true
             step([$class: 'XUnitPublisher',
-                thresholds: [[$class: 'FailedThreshold', failureThreshold: '1']],
+                thresholds: [[$class: 'FailedThreshold', failureThreshold: '0']],
                 tools: [[$class: 'JUnitType', pattern: 'xUnit.xml']]])
             send_notify()
         }
