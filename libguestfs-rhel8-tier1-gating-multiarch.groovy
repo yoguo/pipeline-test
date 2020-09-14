@@ -158,8 +158,10 @@ def send_ci_message() {
 }
 
 def send_notify() {
+    def compose_id = sh(script: "cat $WORKSPACE/COMPOSE_ID.txt | grep -i COMPOSE_ID | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     emailext (
     body: """
+COMPOSE_ID: ${compose_id}
 JOB_NAME: ${env.JOB_NAME}
 BUILD_DISPLAY_NAME: ${env.BUILD_DISPLAY_NAME}
 RESULT: ${currentBuild.currentResult}
