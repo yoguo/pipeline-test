@@ -101,7 +101,6 @@ def runtest() {
 def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
-    echo "${date}"
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def xunit_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i XUNIT_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def nsvc = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i NSVC | awk -F'=' '{print \$2}'", returnStdout: true).trim()
@@ -236,7 +235,6 @@ pipeline {
                 script {
                     parse_ci_message()
                     def ci_env = readYaml file: "ci_message_env.yaml"
-                    echo "${ci_env.KOJI_TAG}"
                     currentBuild.displayName = "#${env.BUILD_ID}_${ci_env.KOJI_TAG}"
                 }
             }
@@ -244,7 +242,6 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
-                    echo "Provisioning ..."
                     provision_env()
                 }
             }
