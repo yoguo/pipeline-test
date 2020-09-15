@@ -138,7 +138,6 @@ pipeline {
     }
     options {
         buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
-        //buildDiscarder(logRotator(daysToKeepStr: '90', artifactDaysToKeepStr: '90'))
         timestamps()
         timeout(time: 3, unit: 'DAYS')
     }
@@ -156,7 +155,7 @@ pipeline {
                 script {
                     parse_ci_message()
                     def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-                    currentBuild.displayName = "${compose_id}_#${env.BUILD_ID}"
+                    currentBuild.displayName = "#${env.BUILD_ID}_${compose_id}"
                 }
             }
         }
