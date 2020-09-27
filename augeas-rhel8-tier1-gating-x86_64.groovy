@@ -60,6 +60,7 @@ def runtest() {
     export GIT_BRANCH="latest-rhel8"
     export EXISTING_NODES
     export RUN_ID
+    export NVR
     export COMPOSE_ID
     export TREE_NAME
 
@@ -197,7 +198,6 @@ pipeline {
     }
     environment {
         MILESTONE_COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
-        UPDATES_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/updates/RHEL-8'
         NIGHTLY_REPO = 'http://download.eng.bos.redhat.com/rhel-8/nightly/RHEL-8'
         TEST_ARCH = 'x86_64'
     }
