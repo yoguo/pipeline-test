@@ -72,6 +72,7 @@ def runtest() {
         $WORKSPACE/xen-ci/utils/augeas_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     fi
 
+    CI_NOTIFIER_VARS="$WORKSPACE/CI_NOTIFIER_VARS.txt"
     if [ ! -f "xUnit.xml" ];then
         echo "TEST_RESULT=failed" >> $CI_NOTIFIER_VARS
         exit 1
