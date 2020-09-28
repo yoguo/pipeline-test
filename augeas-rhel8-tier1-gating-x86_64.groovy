@@ -60,6 +60,7 @@ def runtest() {
     export GIT_BRANCH="latest-rhel8"
     export EXISTING_NODES
     export RUN_ID
+    export TARGET
     export NVR
     export COMPOSE_ID
     export TREE_NAME

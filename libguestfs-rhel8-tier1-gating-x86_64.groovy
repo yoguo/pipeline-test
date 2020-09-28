@@ -83,6 +83,7 @@ def runtest() {
     export GIT_BRANCH="latest-rhel8"
     export EXISTING_NODES
     export RUN_ID
+    export TARGET
     export COMPOSE_REPO
     export COMPOSE_ID
     export TREE_NAME
