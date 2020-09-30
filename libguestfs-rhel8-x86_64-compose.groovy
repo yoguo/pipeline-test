@@ -12,9 +12,9 @@ def parse_ci_message() {
 
         # Check if the compose status if finished
         if [ "${compose_type}" == "nightly" ]; then
-            compose_repo="http://download.eng.pek2.redhat.com/rhel-8/nightly/RHEL-8"
+            compose_repo="http://download-node-02.eng.bos.redhat.com/rhel-8/nightly/RHEL-8"
         else
-            compose_repo="http://download.eng.pek2.redhat.com/rhel-8/rel-eng/RHEL-8"
+            compose_repo="http://download-node-02.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8"
         fi
         WGET_STATUS=0
         wget -O compose_status $compose_repo/${compose_id}/STATUS || WGET_STATUS=1
