@@ -21,7 +21,7 @@ def parse_ci_message() {
         compose_status=`cat compose_status`
         until [ "$WGET_STATUS" == "0" -a "$compose_status" == "FINISHED" ]
         do
-            echo "The new compose ${compose_id} is not ready in pek2 repo now. Waiting..."
+            echo "The new compose ${compose_id} is not ready in bos repo now. Waiting..."
             sleep 10m
             WGET_STATUS=0
             wget -O compose_status $compose_repo/${compose_id}/STATUS || WGET_STATUS=1
@@ -147,6 +147,7 @@ pipeline {
     stages {
         stage("Checkout xen-ci") {
             steps {
+                cleanWs()
                 checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'origin/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'xen-ci']], submoduleCfg: [], userRemoteConfigs: [[url: 'https://code.engineering.redhat.com/gerrit/xen-ci']]]
             }
         }
