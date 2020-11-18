@@ -81,7 +81,7 @@ properties([
             expectedValue: 'nightly',
             field: '$.tag'
           ]
-        ] 
+        ],
         timeout: 30
       ]
     ]
