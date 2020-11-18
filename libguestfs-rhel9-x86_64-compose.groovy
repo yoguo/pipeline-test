@@ -128,6 +128,7 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
+                    echo "debuging..."
                     //provision_env()
                 }
             }
@@ -135,6 +136,7 @@ pipeline {
         stage ("Run Test") {
             steps {
                 script {
+                    echo "debuging..."
                     //runtest()
                 }
             }
