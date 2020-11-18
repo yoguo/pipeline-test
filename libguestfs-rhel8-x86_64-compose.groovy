@@ -2,7 +2,6 @@
 def parse_ci_message() {
     sh '''
     #!/bin/bash -x
-    cp -f /home/jenkins-platform/workspace/yoguo/umb_pungi_parse.py $WORKSPACE/xen-ci/utils/
     python $WORKSPACE/xen-ci/utils/umb_pungi_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     
@@ -107,7 +106,6 @@ BUILD_URL: ${env.BUILD_URL}
 }
 
 
-//https://plugins.jenkins.io/jms-messaging
 properties([
   pipelineTriggers([
     [

@@ -2,13 +2,13 @@ def parse_ci_message() {
     sh '''
     #!/bin/bash -x
     echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
-    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_module_parse.py $WORKSPACE/xen-ci/utils/
     python $WORKSPACE/xen-ci/utils/ci_message_module_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
 
     release_stream=$(cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i RELEASE_STREAM | awk -F'=' '{print \$2}')
     branch=${release_stream#*el}
-    
+    compose_repo=${MILESTONE_COMPOSE_REPO}
+
     if [[ "$branch" =~ "8.0" ]];then
         tree_name=latest-RHEL-8.0.0
     elif [[ "$branch" =~ "8.1" ]];then
@@ -17,19 +17,16 @@ def parse_ci_message() {
         tree_name=latest-RHEL-8.2.0
     elif [[ "$branch" =~ "8.3" ]];then
         tree_name=latest-RHEL-8.3.0
+    elif [[ "$branch" =~ "8.4" ]];then
+        tree_name=latest-RHEL-8.4.0
+        compose_repo=${NIGHTLY_REPO}
     else
         tree_name=latest-RHEL-8.3.0
     fi
 
-    wget ${COMPOSE_REPO}/$tree_name/COMPOSE_ID || exit 1
-    compose_id=$(cat $WORKSPACE/COMPOSE_ID)
-
-    wget ${COMPOSE_REPO}/$tree_name/STATUS
-    if [ "`cat STATUS`" != "FINISHED" ]; then
-        echo "ERROR: STATUS is not FINISHED"
-        compose_id=$(bkr distros-list --limit=500 | grep -i ${tree_name#*latest-} | awk '{print \$2}' | head -n 1)
-    fi
+    compose_id=$(bkr distros-list --limit=500 --tag=RTT_PASSED | grep -i ${tree_name#*latest-} | awk '{print \$2}' | head -n 1)
     echo "COMPOSE_ID=$compose_id" > $WORKSPACE/COMPOSE_ID.txt
+    echo "COMPOSE_REPO=$compose_repo" > $WORKSPACE/COMPOSE_REPO.txt
     '''
 }
 
@@ -51,6 +48,7 @@ def runtest() {
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     source $WORKSPACE/RESOURCES.txt
     source $WORKSPACE/COMPOSE_ID.txt
+    source $WORKSPACE/COMPOSE_REPO.txt
 
     export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
     chmod 600 ${SSH_KEYFILE}
@@ -70,7 +68,7 @@ def runtest() {
     CI_NOTIFIER_VARS="$WORKSPACE/CI_NOTIFIER_VARS.txt"
     echo "NSVC=$nsvc" >> $CI_NOTIFIER_VARS
 
-    cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
+    #cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
 
     if [ ! -f "xUnit.xml" ];then
@@ -89,10 +87,6 @@ def runtest() {
     fi
     echo "TEST_RESULT=$test_result" >> $CI_NOTIFIER_VARS
  
-    gzip -c xUnit_log.xml > xunit_result.gz
-    xunit_result=$(base64 -w0 xunit_result.gz)
-    echo "XUNIT_RESULT=$xunit_result" >> $CI_NOTIFIER_VARS
-
     # Teardown Env
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh teardown_beaker
     '''
@@ -102,7 +96,6 @@ def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-    def xunit_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i XUNIT_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def nsvc = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i NSVC | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
@@ -144,7 +137,7 @@ def send_ci_message() {
   "status": "${test_result}",
   "namespace": "xen-ci.libguestfs.redhat-module.gating.${TEST_ARCH}",
   "generated_at": "${date}",
-  "xunit": "${xunit_result}",
+  "xunit": "${env.BUILD_URL}artifact/xUnit_log.xml",
   "version": "0.1.0"
 }"""
     echo "${message_content}"
@@ -223,7 +216,8 @@ pipeline {
     }
     environment {
         TEST_ARCH = sh(script: "echo '${env.JOB_NAME}' | awk -F'-' '{print \$5}'", returnStdout: true).trim()
-        COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
+        MILESTONE_COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
+        NIGHTLY_REPO = 'http://download.eng.bos.redhat.com/rhel-8/nightly/RHEL-8'
     }
     stages {
         stage("Checkout xen-ci") {

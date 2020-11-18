@@ -3,7 +3,6 @@ def parse_ci_message() {
     sh '''
     #!/bin/bash -x
     echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
-    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_module_parse.py $WORKSPACE/xen-ci/utils/
     python $WORKSPACE/xen-ci/utils/ci_message_module_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
 
@@ -30,6 +29,17 @@ def parse_ci_message() {
     elif [[ "$branch" =~ "8.3.0" ]];then
         tree_name=latest-RHEL-8.3.0
         compose_repo=$MILESTONE_COMPOSE_REPO
+    elif [[ "$branch" =~ "8.3.1" ]];then
+        tree_name=latest-RHEL-8.3.1
+        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.3.1-updates)
+        compose_repo=$UPDATES_REPO
+    elif [[ "$branch" =~ "8.4.0" ]];then
+        tree_name=latest-RHEL-8.4.0
+        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.4.0-20)
+        compose_repo=$NIGHTLY_REPO
+        wget $NIGHTLY_REPO/$compose_id || {
+            compose_repo=$MILESTONE_COMPOSE_REPO
+        }
     else
         tree_name=latest-RHEL-8.3.0
         compose_repo=$MILESTONE_COMPOSE_REPO
@@ -37,6 +47,7 @@ def parse_ci_message() {
 
     echo "COMPOSE_REPO=$compose_repo" > $WORKSPACE/COMPOSE_REPO.txt
     echo "TREE_NAME=$tree_name" >> $WORKSPACE/COMPOSE_REPO.txt
+    echo "BRANCH=$branch" >> $WORKSPACE/COMPOSE_REPO.txt
 
     if [ -z "$compose_id" ]; then
         wget $compose_repo/$tree_name/COMPOSE_ID
@@ -56,10 +67,11 @@ def provision_env() {
     export DISTRO=$COMPOSE_ID
     export TARGET="libguestfs-rhel8-os"
     resource_location="openstack"
-    cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_provision_env.sh $WORKSPACE/xen-ci/utils/
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_openstack || { 
         export TARGET="libguestfs-rhel8-gating"
         resource_location="beaker"
+        source $WORKSPACE/COMPOSE_REPO.txt
+        export DISTRO=$(bkr distros-list --limit=500 --tag=RTT_PASSED | grep -i RHEL-${BRANCH%.*}.0 | awk '{print \$2}' | head -n 1)
         $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker || exit 1
     }
 
@@ -99,7 +111,6 @@ def runtest() {
         cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     else
-        cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     fi
 
@@ -119,10 +130,6 @@ def runtest() {
     fi
     echo "TEST_RESULT=$test_result" >> $CI_NOTIFIER_VARS
  
-    gzip -c xUnit_log.xml > xunit_result.gz
-    xunit_result=$(base64 -w0 xunit_result.gz)
-    echo "XUNIT_RESULT=$xunit_result" >> $CI_NOTIFIER_VARS
-
     # Teardown Env
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh teardown_${RESOURCE_LOCATION}
     '''
@@ -132,7 +139,6 @@ def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-    def xunit_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i XUNIT_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def nsvc = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i NSVC | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
@@ -174,7 +180,7 @@ def send_ci_message() {
   "status": "${test_result}",
   "namespace": "xen-ci.libguestfs.redhat-module",
   "generated_at": "${date}",
-  "xunit": "${xunit_result}",
+  "xunit": "${env.BUILD_URL}artifact/xUnit_log.xml",
   "version": "0.1.0"
 }"""
     echo "${message_content}"
@@ -229,7 +235,7 @@ properties(
                             field: '$.name'
                         ],
                         [
-                            expectedValue: 'true',
+                            expectedValue: 'false',
                             field: '$.scratch'
                         ]
                     ]
