@@ -79,7 +79,7 @@ properties([
         ],
         checks: [
           [
-            expectedValue: '^nightly',
+            expectedValue: '^nightly$',
             field: '$.tag'
           ]
         ],
