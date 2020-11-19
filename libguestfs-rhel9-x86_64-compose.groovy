@@ -2,6 +2,7 @@
 def parse_ci_message() {
     sh '''
     #!/bin/bash -x
+    echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
     cp -f /home/jenkins-platform/workspace/yoguo/ci_message_ctg_parse.py $WORKSPACE/xen-ci/utils/
     python $WORKSPACE/xen-ci/utils/ci_message_ctg_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
@@ -78,7 +79,7 @@ properties([
         ],
         checks: [
           [
-            expectedValue: 'nightly',
+            expectedValue: '^nightly',
             field: '$.tag'
           ]
         ],
