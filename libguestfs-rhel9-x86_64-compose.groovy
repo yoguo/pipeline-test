@@ -3,8 +3,8 @@ def parse_ci_message() {
     sh '''
     #!/bin/bash -x
     echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
-    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_ctg_parse.py $WORKSPACE/xen-ci/utils/
-    python $WORKSPACE/xen-ci/utils/ci_message_ctg_parse.py
+    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_cts_parse.py $WORKSPACE/xen-ci/utils/
+    python $WORKSPACE/xen-ci/utils/ci_message_cts_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     
     echo "DISTRO=$COMPOSE_ID" > $WORKSPACE/DISTRO.txt
@@ -81,6 +81,10 @@ properties([
           [
             expectedValue: '^nightly$',
             field: '$.tag'
+          ],
+          [
+            expectedValue: '^RHEL$',
+            field: '$.compose.compose_info.payload.release.short'
           ]
         ],
         timeout: 30
