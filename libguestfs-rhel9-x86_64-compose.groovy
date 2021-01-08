@@ -130,16 +130,16 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
-                    echo "debuging..."
-                    //provision_env()
+                    //echo "debuging..."
+                    provision_env()
                 }
             }
         }
         stage ("Run Test") {
             steps {
                 script {
-                    echo "debuging..."
-                    //runtest()
+                    //echo "debuging..."
+                    runtest()
                 }
             }
         }
