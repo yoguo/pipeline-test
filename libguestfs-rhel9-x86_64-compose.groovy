@@ -83,6 +83,10 @@ properties([
             expectedValue: '^RHEL$',
             field: '$.compose.compose_info.payload.release.short'
           ]
+          [
+            expectedValue: '9.*',
+            field: '$.compose.compose_info.payload.release.version'
+          ]
         ],
         timeout: 30
       ]
