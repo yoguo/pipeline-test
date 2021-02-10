@@ -8,7 +8,7 @@ def parse_ci_message() {
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     
     echo "DISTRO=$COMPOSE_ID" > $WORKSPACE/DISTRO.txt
-    wget $NIGHTLY_REPO/$COMPOSE_ID/compose/AppStream/$TEST_ARCH/os/Packages/ -O packages.html
+    wget $COMPOSES_REPO/$COMPOSE_ID/compose/AppStream/$TEST_ARCH/os/Packages/ -O packages.html
     nvr=$(cat packages.html | grep -v python | egrep -oe "libguestfs-[0-9]{1}.[0-9]{2}.[0-9]{1,3}-[.0-9]{2,6}el9" | head -n 1)
     echo "NVR=$nvr" >> $WORKSPACE/CI_MESSAGE_ENV.txt
     '''
@@ -111,6 +111,7 @@ pipeline {
     }
     environment {
         MILESTONE_COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-9/rel-eng/RHEL-9'
+        COMPOSES_REPO = 'http://download.eng.bos.redhat.com/rhel-9/composes/RHEL-9'
         UPDATES_REPO = 'http://download.eng.bos.redhat.com/rhel-9/rel-eng/updates/RHEL-9'
         NIGHTLY_REPO = 'http://download.eng.bos.redhat.com/rhel-9/nightly/RHEL-9'
         TEST_ARCH = 'x86_64'
