@@ -43,7 +43,7 @@ def runtest() {
     $WORKSPACE/xen-ci/utils/libguestfs_runtest_rhel9.sh |& tee $WORKSPACE/log.libguestfs-ci
     $WORKSPACE/xen-ci/utils/mergexml.py xUnit.xml
 
-    prefix=$(echo "${NVR} ${compose_id} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g' | sed 's/\\+/_/g')
+    prefix=$(echo "${NVR} ${COMPOSE_ID} ${TEST_ARCH}" | sed 's/\\.\\|\\&/_/g')
     $WORKSPACE/xen-ci/utils/import_XunitResult2Polarion.py -p RHEL7 -t libguestfs -f xUnit.xml -d $WORKSPACE/xen-ci/database/testcases.db  -r "$prefix" -k zeFae6ceiRiewae
     '''
 }
