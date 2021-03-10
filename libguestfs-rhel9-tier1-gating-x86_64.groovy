@@ -126,12 +126,16 @@ def send_ci_message() {
     "provider": "${provider}",
     "architecture": "${TEST_ARCH}"
   },
+  "label": [
+    "${TEST_ARCH}"
+  ],
   "type": "tier1",
   "category": "functional",
   "thread_id": "${ci.BREW_TASKID}-${TEST_ARCH}-gating",
   "status": "${test_result}",
   "namespace": "xen-ci.brew-build",
   "generated_at": "${date}",
+  "xunit": "${env.BUILD_URL}artifact/xUnit_log.xml",
   "version": "0.1.0"
 }"""
     echo "${message_content}"
