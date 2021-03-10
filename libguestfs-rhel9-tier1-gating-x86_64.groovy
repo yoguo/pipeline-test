@@ -59,7 +59,7 @@ def runtest() {
     export TARGET
     export NVR
     export COMPOSE_REPO
-    export COMPOSE_ID
+    export DISTRO_ID
     export TREE_NAME
     export ID=$BREW_BUILDID
 
