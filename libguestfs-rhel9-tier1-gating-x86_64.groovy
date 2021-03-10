@@ -174,7 +174,7 @@ properties(
                     overrides: [
                         topic: 'Consumer.rh-jenkins-ci-plugin.5afcb246-a416-46cb-94e7-43dc3cb1735b.VirtualTopic.eng.brew.build.tag.>'
                     ],
-                    selector:  name = \'libguestfs\' AND (tag LIKE \'rhel-9._._-alpha-gate\' OR tag LIKE \'rhel-9._._-beta-gate\' OR tag LIKE \'rhel-9._._-gate\' OR tag LIKE \'rhel-9._._-z-gate\')',
+                    selector:  '(name = \'libguestfs\' OR name = \'supermin\' OR name = \'hivex\' OR name = \'libguestfs-winsupport\') AND (tag LIKE \'rhel-9._._-alpha-gate\' OR tag LIKE \'rhel-9._._-beta-gate\' OR tag LIKE \'rhel-9._._-gate\' OR tag LIKE \'rhel-9._._-z-gate\')',
                     timeout: 30
                 ]
             ]]
@@ -222,7 +222,6 @@ pipeline {
         stage ("Provision Env") {
             steps {
                 script {
-                    //echo "debuging..."
                     provision_env()
                 }
             }
@@ -230,8 +229,8 @@ pipeline {
         stage ("Run Test") {
             steps {
                 script {
-                    //echo "debuging..."
                     runtest()
+                    send_ci_message()
                 }
             }
         }
