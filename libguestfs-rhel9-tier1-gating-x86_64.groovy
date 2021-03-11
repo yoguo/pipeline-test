@@ -218,8 +218,8 @@ pipeline {
             steps {
                 script {
                     parse_ci_message()
-                    def compose_id = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i compose_id | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-                    currentBuild.displayName = "#${env.BUILD_ID}_${compose_id}"
+                    def ci_env = readYaml file: "ci_message_env.yaml"
+                    currentBuild.displayName = "#${env.BUILD_ID}_${ci_env.NVR}"
                 }
             }
         }
