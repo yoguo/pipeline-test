@@ -91,22 +91,12 @@ def runtest() {
     # Teardown Env
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh teardown_openstack
 
-    if [[ `cat $WORKSPACE/virt-what.kvm.log` == "kvm" ]]; then
-        echo "TEST_RESULT_KVM=passed" > $WORKSPACE/CI_NOTIFIER_VARS.txt
+    if [[ `cat $WORKSPACE/virt-what.kvm.log` == "kvm" ]] \
+       && [[ `cat $WORKSPACE/virt-what.nested.kvm.log` == "kvm" ]] \
+       && [[ `cat $WORKSPACE/virt-what.tcg.log` == "qemu" ]]; then
+        echo "TEST_RESULT=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
     else
-        echo "TEST_RESULT_KVM=failed" > $WORKSPACE/CI_NOTIFIER_VARS.txt
-    fi
-
-    if [[ `cat $WORKSPACE/virt-what.nested.kvm.log` == "kvm" ]]; then
-        echo "TEST_RESULT_NESTED_KVM=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
-    else
-        echo "TEST_RESULT_NESTED_KVM=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
-    fi
-
-    if [[ `cat $WORKSPACE/virt-what.tcg.log` == "qemu" ]]; then
-        echo "TEST_RESULT_TCG=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
-    else
-        echo "TEST_RESULT_TCG=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
+        echo "TEST_RESULT=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
     fi
     '''
 }
@@ -116,6 +106,7 @@ def send_ci_message() {
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
+    def os = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i BRANCH | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
     def message_content = """\
 {
@@ -140,7 +131,7 @@ def send_ci_message() {
     "scratch": false
   },
   "system": {
-    "os": "",
+    "os": "${os}",
     "provider": "${provider}",
     "architecture": "${TEST_ARCH}"
   },
