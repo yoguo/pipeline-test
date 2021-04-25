@@ -80,24 +80,30 @@ def runtest() {
     if [ "$RESOURCE_LOCATION" == "openstack" ]; then
         cp -f /home/jenkins-platform/workspace/yoguo/virt-what_runtest_os_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/virt-what_runtest_os_gating.sh |& tee $WORKSPACE/log.runtest
+        
+        if [[ `cat $WORKSPACE/virt-what.kvm.log` == "kvm" ]] \
+          && [[ `cat $WORKSPACE/virt-what.nested.kvm.log` == "kvm" ]] \
+          && [[ `cat $WORKSPACE/virt-what.tcg.log` == "qemu" ]]; then
+            echo "TEST_RESULT=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
+        else
+            echo "TEST_RESULT=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
+        fi
     else
         cp -f /home/jenkins-platform/workspace/yoguo/virt-what_runtest_beaker_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/virt-what_runtest_beaker_gating.sh |& tee $WORKSPACE/log.runtest
+
+        if [[ `cat $WORKSPACE/virt-what.kvm.log` == "kvm" ]]; then
+            echo "TEST_RESULT=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
+        else
+            echo "TEST_RESULT=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
+        fi
     fi
 
     export TARGET
     export RUN_ID
 
     # Teardown Env
-    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh teardown_openstack
-
-    if [[ `cat $WORKSPACE/virt-what.kvm.log` == "kvm" ]] \
-       && [[ `cat $WORKSPACE/virt-what.nested.kvm.log` == "kvm" ]] \
-       && [[ `cat $WORKSPACE/virt-what.tcg.log` == "qemu" ]]; then
-        echo "TEST_RESULT=passed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
-    else
-        echo "TEST_RESULT=failed" >> $WORKSPACE/CI_NOTIFIER_VARS.txt
-    fi
+    $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh teardown_${RESOURCE_LOCATION}
     '''
 }
 
@@ -105,6 +111,15 @@ def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
+    if (test_result == 'passed')
+    {
+        currentBuild.result = 'SUCCESS'
+    }
+    else
+    {
+        currentBuild.result = "FAILURE"
+    }
+
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def os = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i BRANCH | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
