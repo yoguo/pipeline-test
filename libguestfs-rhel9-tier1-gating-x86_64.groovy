@@ -1,4 +1,3 @@
-
 def parse_ci_message() {
     sh '''
     #!/bin/bash -x
@@ -178,7 +177,7 @@ properties(
                     overrides: [
                         topic: 'Consumer.rh-jenkins-ci-plugin.5afcb246-a416-46cb-94e7-43dc3cb1735b.VirtualTopic.eng.brew.build.tag.>'
                     ],
-                    selector:  '(name = \'libguestfs\' OR name = \'supermin\' OR name = \'hivex\' OR name = \'libguestfs-winsupport\') AND (tag LIKE \'rhel-9._._-alpha-gate\' OR tag LIKE \'rhel-9._._-beta-gate\' OR tag LIKE \'rhel-9._._-gate\' OR tag LIKE \'rhel-9._._-z-gate\')',
+                    selector:  '(name = \'libguestfs\' OR name = \'guestfs-tools\' OR name = \'supermin\' OR name = \'hivex\' OR name = \'libguestfs-winsupport\') AND (tag LIKE \'rhel-9._._-beta-gate\' OR tag LIKE \'rhel-9._._-gate\' OR tag LIKE \'rhel-9._._-z-gate\')',
                     timeout: 30
                 ]
             ]]
