@@ -57,6 +57,7 @@ def runtest() {
     export RUN_ID
     export TARGET
     export NVR
+    export PKGNAME
     export COMPOSE_REPO
     export DISTRO_ID
     export TREE_NAME
