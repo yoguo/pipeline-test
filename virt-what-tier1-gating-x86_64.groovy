@@ -6,10 +6,12 @@ def parse_ci_message() {
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     
     tag=$(grep -i tag $WORKSPACE/CI_MESSAGE_ENV.txt | awk -F'=' '{print \$2}')
-    if [[ $tag =~ "8.5.0" ]]; then
-        tree_name=latest-RHEL-8.5.0
+    # 8.4.0/8.5.0/9.0.0
+    release_version=${tag:5:5}
+    if [[ $release_version =~ "8." ]]; then
+        tree_name=latest-RHEL-$release_version
         branch=rhel-8
-        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-8.5.0)
+        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-${release_version})
         compose_repo=$RHEL8_NIGHTLY_REPO
         wget $RHEL8_NIGHTLY_REPO/$compose_id || {
             compose_repo=$RHEL8_MILESTONE_COMPOSE_REPO
@@ -19,14 +21,14 @@ def parse_ci_message() {
         if [[ $distro_id == "" ]]; then
             distro_id=$(bkr distros-list --limit=1 --name=${tree_name#*latest-}%.n.% | grep -i Name  | awk '{print \$2}')
         fi
-    elif [[ $tag =~ "9.0.0" ]]; then
-        tree_name=latest-RHEL-9.0.0
+    elif [[ $release_version =~ "9.0.0" ]]; then
+        tree_name=latest-RHEL-$release_version
         branch=rhel-9
-        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-9.0.0)
+        compose_id=$($WORKSPACE/xen-ci/utils/libguestfs_get_compose_id.sh RHEL-${release_version})
         label=$(echo $tag | awk -F'-' '{print \$3}')
         compose_repo=$RHEL9_NIGHTLY_REPO-${label^}
         #compose_repo=$RHEL9_COMPOSES_REPO
-        distro_id=$(bkr distros-list --name=RHEL-9% --tag=CTS_NIGHTLY --tag=${label^}-0.1 --limit=1 | grep RHEL-9.0.0 | awk '{print \$2}')
+        distro_id=$(bkr distros-list --name=RHEL-9% --tag=CTS_NIGHTLY --tag=${label^}-0.1 --limit=1 | grep RHEL-$release_version | awk '{print \$2}')
     fi
 
     echo "BRANCH=$branch" >> $WORKSPACE/CI_MESSAGE_ENV.txt
@@ -111,15 +113,6 @@ def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
     String date = sh(script: 'date -uIs', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
-    if (test_result == 'passed')
-    {
-        currentBuild.result = 'SUCCESS'
-    }
-    else
-    {
-        currentBuild.result = "FAILURE"
-    }
-
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def os = sh(script: "cat $WORKSPACE/CI_MESSAGE_ENV.txt | grep -i BRANCH | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
