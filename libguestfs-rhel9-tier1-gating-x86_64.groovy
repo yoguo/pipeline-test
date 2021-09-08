@@ -105,7 +105,7 @@ def send_ci_message() {
     "name": "Xen CI",
     "team": "Xen QE",
     "irc": "#AzureQE",
-    "url": "https://cloud-jenkins-csb-virt-qe.apps.ocp4.prod.psi.redhat.com",
+    "url": "https://cloud-jenkins-csb-virt-qe.apps.ocp-c1.prod.psi.redhat.com",
     "email": "xen-qe-list@redhat.com"
   },
   "run": {
