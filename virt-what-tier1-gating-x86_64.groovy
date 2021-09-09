@@ -19,7 +19,7 @@ def parse_ci_message() {
 
         distro_id=$(bkr distros-list --limit=500 --tag=RTT_PASSED | grep -i ${tree_name#*latest-} | awk '{print \$2}' | head -n 1)
         if [[ $distro_id == "" ]]; then
-            distro_id=$(bkr distros-list --limit=1 --name=${tree_name#*latest-}%.n.% | grep -i Name  | awk '{print \$2}')
+            distro_id=$(bkr distros-list --name=${tree_name#*latest-}% --tag=CTS_NIGHTLY  --limit=1 | grep -i ${tree_name#*latest-} | awk '{print \$2}')
         fi
     elif [[ $release_version =~ "9.0.0" ]]; then
         tree_name=latest-RHEL-$release_version
