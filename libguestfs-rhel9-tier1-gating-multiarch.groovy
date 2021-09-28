@@ -22,7 +22,7 @@ def provision_env() {
     #!/bin/bash -x
     source $WORKSPACE/COMPOSE_ID.txt
     export DISTRO=$COMPOSE_ID
-    export TARGET="libguestfs-rhel9-gating"
+    export TARGET="libguestfs-rhel9-${TEST_ARCH}"
     export ARCH=${TEST_ARCH}
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_beaker || exit 1
     echo "TARGET=$TARGET" >> $WORKSPACE/RESOURCES.txt
