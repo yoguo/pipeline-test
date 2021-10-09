@@ -9,7 +9,7 @@ def parse_ci_message() {
     if [[ "$tag" =~ "9.0.0" ]]; then
         tree_name=latest-RHEL-9.0.0
         compose_repo=$COMPOSES_REPO
-        compose_id=$(bkr distros-list --name=RHEL-9% --tag=CTS_NIGHTLY --limit=1 | grep RHEL-9.0.0 | awk '{print \$2}')
+        compose_id=$(bkr distros-list --name=RHEL-9% --tag=CTS_NIGHTLY --tag=Beta-1.0 --limit=1 | grep RHEL-9.0.0 | awk '{print \$2}')
     fi
 
     echo "COMPOSE_ID=$compose_id" > $WORKSPACE/COMPOSE_ID.txt
