@@ -85,10 +85,11 @@ def send_ci_message() {
   
     def message_content = """\
 {
-  "ci": {
+  "contact": {
     "name": "Xen CI",
     "team": "Xen QE",
     "irc": "#AzureQE",
+    "docs": "https://docs.engineering.redhat.com/display/XENQE/Libguestfs",
     "url": "https://cloud-jenkins-csb-virt-qe.apps.ocp-c1.prod.psi.redhat.com",
     "email": "xen-qe-list@redhat.com"
   },
@@ -99,7 +100,7 @@ def send_ci_message() {
  },
   "artifact": {
     "type": "brew-build",
-    "id": "${ci.BREW_TASKID}",
+    "id": ${ci.BREW_TASKID},
     "issuer": "${ci.OWNER}",
     "component": "${ci.PKGNAME}",
     "nvr": "${ci.NVR}",
@@ -110,22 +111,27 @@ def send_ci_message() {
     "provider": "${provider}",
     "architecture": "${TEST_ARCH}"
   },
+  "pipeline": {
+    "id": "${ci.BREW_TASKID}-${TEST_ARCH}-gating",
+    "name": "tier1-gating"
+  },
   "label": [
     "${TEST_ARCH}"
   ],
-  "type": "tier1",
-  "category": "functional",
-  "thread_id": "${ci.BREW_TASKID}-${TEST_ARCH}-gating",
-  "status": "${test_result}",
-  "namespace": "xen-ci.brew-build.gating.${TEST_ARCH}",
+  "test": {
+    "type": "tier1",
+    "category": "functional",
+    "result": "${test_result}",
+    "namespace": "xen-ci.brew-build.gating.${TEST_ARCH}",
+    "xunit": "${env.BUILD_URL}artifact/xUnit_log.xml"
+  },
   "generated_at": "${date}",
-  "xunit": "${env.BUILD_URL}artifact/xUnit_log.xml",
-  "version": "0.1.0"
+  "version": "1.1.9"
 }"""
     echo "${message_content}"
     return sendCIMessage (
         providerName: 'Red Hat UMB',
-        overrides: [topic: 'VirtualTopic.eng.ci.brew-build.test.complete'],
+        overrides: [topic: 'VirtualTopic.eng.ci.xen-ci.brew-build.test.complete'],
         messageContent: message_content,
         messageType: 'Custom',
         failOnError: true
