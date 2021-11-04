@@ -79,7 +79,7 @@ def runtest() {
 
 def send_ci_message() {
     ci = readYaml file: 'ci_message_env.yaml'
-    String date = sh(script: 'date -uIs', returnStdout: true).trim()
+    String date = sh(script: 'date --utc +%FT%T.%3NZ', returnStdout: true).trim()
     def test_result = sh(script: "cat $WORKSPACE/CI_NOTIFIER_VARS.txt | grep -i TEST_RESULT | awk -F'=' '{print \$2}'", returnStdout: true).trim()
     def provider = sh(script: "cat $WORKSPACE/RESOURCES.txt | grep -i RESOURCE_LOCATION | awk -F'=' '{print \$2}'", returnStdout: true).trim()
   
@@ -106,18 +106,17 @@ def send_ci_message() {
     "nvr": "${ci.NVR}",
     "scratch": false
   },
-  "system": {
-    "os": "RHEL9",
-    "provider": "${provider}",
-    "architecture": "${TEST_ARCH}"
-  },
+  "system": [
+    {
+      "os": "RHEL9",
+      "provider": "${provider}",
+      "architecture": "${TEST_ARCH}"
+    }
+  ],
   "pipeline": {
     "id": "${ci.BREW_TASKID}-${TEST_ARCH}-gating",
     "name": "tier1-gating"
   },
-  "label": [
-    "${TEST_ARCH}"
-  ],
   "test": {
     "type": "tier1",
     "category": "functional",
