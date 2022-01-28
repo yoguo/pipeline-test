@@ -3,27 +3,32 @@ def parse_ci_message() {
     sh '''
     #!/bin/bash -x
     echo ${CI_MESSAGE} | tee $WORKSPACE/CI_MESSAGE.json
-    cp -f /home/jenkins-platform/workspace/yoguo/ci_message_parse.py $WORKSPACE/xen-ci/utils/
     python $WORKSPACE/xen-ci/utils/ci_message_parse.py
     source $WORKSPACE/CI_MESSAGE_ENV.txt
 
+    COMPOSE_REPO=$MILESTONE_COMPOSE_REPO
     tag=$(grep -i tag $WORKSPACE/CI_MESSAGE_ENV.txt | awk -F'=' '{print \$2}')
     if [[ "$tag" =~ "8.0.0" ]]; then
         tree_name=latest-RHEL-8.0.0
-    elif [ "$tag" =~ "8.1.0" ];then
+    elif [[ "$tag" =~ "8.1.0" ]];then
         tree_name=latest-RHEL-8.1.0
-    elif [ "$tag" =~ "8.2.0" ];then
+    elif [[ "$tag" =~ "8.2.0" ]];then
         tree_name=latest-RHEL-8.2.0
-    elif [ "$tag" =~ "8.3.0" ];then
+    elif [[ "$tag" =~ "8.3.0" ]];then
         tree_name=latest-RHEL-8.3.0
+    elif [[ "$tag" =~ "8.4.0" ]];then
+        #tree_name=latest-RHEL-8.4.0
+        tree_name=$(bkr distros-list --limit=500 --tag=RTT_PASSED | grep -i RHEL-8.4.0 | awk '{print \$2}' | head -n 1)
+        COMPOSE_REPO=$NIGHTLY_REPO
     else
         tree_name=latest-RHEL-8.3.0
     fi
 
-    wget $MILESTONE_COMPOSE_REPO/$tree_name/COMPOSE_ID
+    wget $COMPOSE_REPO/$tree_name/COMPOSE_ID
     compose_id=$(cat $WORKSPACE/COMPOSE_ID)
     echo "COMPOSE_ID=$compose_id" > $WORKSPACE/COMPOSE_ID.txt
-    wget $MILESTONE_COMPOSE_REPO/$tree_name/STATUS || exit 1
+    echo "COMPOSE_REPO=$COMPOSE_REPO" > $WORKSPACE/COMPOSE_REPO.txt
+    wget $COMPOSE_REPO/$tree_name/STATUS || exit 1
     '''
 }
 
@@ -34,7 +39,6 @@ def provision_env() {
     export DISTRO=$COMPOSE_ID
     export TARGET="augeas-rhel8-os"
     resource_location="openstack"
-    cp -f /home/jenkins-platform/workspace/yoguo/libguestfs_provision_env.sh $WORKSPACE/xen-ci/utils/
     $WORKSPACE/xen-ci/utils/libguestfs_provision_env.sh provision_openstack || { 
         export TARGET="libguestfs-rhel8-gating"
         resource_location="beaker"
@@ -52,6 +56,7 @@ def runtest() {
     source $WORKSPACE/CI_MESSAGE_ENV.txt
     source $WORKSPACE/RESOURCES.txt
     source $WORKSPACE/COMPOSE_ID.txt
+    source $WORKSPACE/COMPOSE_REPO.txt
 
     export SSH_KEYFILE="$WORKSPACE/xen-ci/config/keys/xen-jenkins"
     chmod 600 ${SSH_KEYFILE}
@@ -63,13 +68,14 @@ def runtest() {
     export TARGET
     export NVR
     export COMPOSE_ID
+    export COMPOSE_REPO
     export TREE_NAME
 
     if [ "$RESOURCE_LOCATION" == "openstack" ]; then
-        cp -f /home/jenkins-platform/workspace/yoguo/augeas_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
+        #cp -f /home/jenkins-platform/workspace/yoguo/augeas_runtest_rhel8_os_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/augeas_runtest_rhel8_os_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     else
-        cp -f /home/jenkins-platform/workspace/yoguo/augeas_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
+        #cp -f /home/jenkins-platform/workspace/yoguo/augeas_runtest_rhel8_beaker_gating.sh $WORKSPACE/xen-ci/utils/
         $WORKSPACE/xen-ci/utils/augeas_runtest_rhel8_beaker_gating.sh |& tee $WORKSPACE/log.libguestfs_runtest
     fi
 
@@ -196,7 +202,7 @@ pipeline {
     options {
         buildDiscarder(logRotator(daysToKeepStr: '180', numToKeepStr: '60'))
         timestamps()
-        timeout(time: 1, unit: 'DAYS')
+        timeout(time: 2, unit: 'DAYS')
     }
     environment {
         MILESTONE_COMPOSE_REPO = 'http://download.eng.bos.redhat.com/rhel-8/rel-eng/RHEL-8'
